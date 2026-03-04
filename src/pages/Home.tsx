@@ -5,7 +5,7 @@ import '../App.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  
+
   // 1. Create state for the fact
   const [funFact, setFunFact] = useState("Loading amazing plant fact...");
 
@@ -56,12 +56,12 @@ const Home = () => {
 
       {/* Main Cards Section with Click Handlers */}
       <section className="category-container">
-        
+
         {/* Card 1: Indoor */}
         <div className="plant-card" onClick={() => navigate('/indoor')}>
-          <img 
-            src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=600&q=80" 
-            alt="Indoor Plants" 
+          <img
+            src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=600&q=80"
+            alt="Indoor Plants"
           />
           <div className="card-content">
             <h3>Indoor Sanctuary</h3>
@@ -71,9 +71,9 @@ const Home = () => {
 
         {/* Card 2: Outdoor */}
         <div className="plant-card" onClick={() => navigate('/outdoor')}>
-          <img 
-            src="https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=600&q=80" 
-            alt="Outdoor Plants" 
+          <img
+            src="https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=600&q=80"
+            alt="Outdoor Plants"
           />
           <div className="card-content">
             <h3>Outdoor Garden</h3>
@@ -83,13 +83,13 @@ const Home = () => {
 
         {/* Card 3: Scan */}
         <div className="plant-card" onClick={() => navigate('/scan')}>
-          <img 
-            src="https://cdn.mos.cms.futurecdn.net/p7mVFaT7RAN4eknmo9bZgh.jpg" 
-            alt="Scan Plant" 
+          <img
+            src="https://cdn.mos.cms.futurecdn.net/p7mVFaT7RAN4eknmo9bZgh.jpg"
+            alt="Scan Plant"
           />
           <div className="card-content">
             <h3>Scan Disease</h3>
-            <p>Upload a photo to detect diseases instantly.</p>
+            <p>Use your camera to scan and detect plant diseases in real-time.</p>
           </div>
         </div>
 
@@ -98,22 +98,22 @@ const Home = () => {
       {/* --- FUN FACT SECTION (Updated to Automatic) --- */}
       <section className="fun-facts-section">
         <div className="fun-fact-container" style={{
-          margin: '20px auto', 
-          maxWidth: '600px', 
+          margin: '20px auto',
+          maxWidth: '600px',
           textAlign: 'center'
         }}>
-          <h3 style={{color: '#2e7d32'}}>Did you know?</h3>
-          
+          <h3 style={{ color: '#2e7d32' }}>Did you know?</h3>
+
           <div style={{
             background: '#e8f5e9', // Kept the card background solid for readability
-            padding: '20px', 
+            padding: '20px',
             borderRadius: '15px',
             boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
             transition: 'all 0.5s ease',
             marginTop: '15px'
           }}>
-            <span style={{fontSize: '1.5rem', marginRight: '10px'}}>🌱</span>
-            <span style={{fontSize: '1.1rem', color: '#1b5e20', fontWeight: '500'}}>
+            <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>🌱</span>
+            <span style={{ fontSize: '1.1rem', color: '#1b5e20', fontWeight: '500' }}>
               {funFact}
             </span>
           </div>
