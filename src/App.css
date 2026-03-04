@@ -1,0 +1,897 @@
+/* Paste this into src/App.css */
+
+/* --- Global Reset --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f9f4; /* Light mint background */
+  color: #333;
+}
+
+/* --- Navigation Bar --- */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #2e7d32;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #1b5e20;
+}
+
+/* --- Hero / Header Section --- */
+.header-section {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.header-section h1 {
+  font-size: 2.5rem;
+  color: #1b5e20;
+  margin-bottom: 0.5rem;
+}
+
+.header-section p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* --- The Spotlight Card Container --- */
+.category-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+/* --- The Card Styling --- */
+.plant-card {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.plant-card img {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card-content {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.card-content h3 {
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+.card-content p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* --- THE SPOTLIGHT ANIMATION --- */
+.category-container:hover .plant-card {
+  opacity: 0.5;
+  filter: blur(2px) grayscale(50%);
+  transform: scale(0.95);
+}
+
+.category-container .plant-card:hover {
+  opacity: 1;
+  filter: blur(0) grayscale(0%);
+  transform: scale(1.05) translateY(-10px);
+  z-index: 10;
+  box-shadow: 0 20px 40px rgba(46, 125, 50, 0.3);
+  border: 2px solid #4CAF50;
+}
+
+.plant-card:hover img {
+  transform: scale(1.1);
+}
+
+/* --- Fun Facts Section --- */
+.fun-facts-section {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: #e8f5e9;
+  margin-top: 3rem;
+  border-radius: 20px 20px 0 0;
+}
+
+.fun-fact-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  display: inline-block;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  transition: transform 0.3s;
+}
+
+.fun-fact-card:hover {
+  transform: translateY(-5px);
+}
+
+/* =========================================
+   ADD THIS TO THE BOTTOM OF src/App.css
+   ========================================= */
+
+/* --- Inputs & Search Bars --- */
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.modern-input {
+  padding: 12px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 30px;
+  font-size: 1rem;
+  width: 300px;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.modern-input:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 8px rgba(46, 125, 50, 0.2);
+}
+
+.modern-btn {
+  padding: 12px 25px;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modern-btn:hover {
+  background-color: #1b5e20;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+}
+
+/* --- Scan Page Styles --- */
+.scan-container {
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.upload-box {
+  border: 3px dashed #a5d6a7;
+  padding: 40px;
+  border-radius: 15px;
+  margin: 20px 0;
+  cursor: pointer;
+  transition: background 0.3s;
+  position: relative;
+}
+
+.upload-box:hover {
+  background-color: #f1f8e9;
+}
+
+.upload-box input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* --- Settings Page Styles --- */
+.settings-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 20px;
+}
+
+.settings-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-group h3 {
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+/* --- New History Grid Layout --- */
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Auto-fit columns */
+  gap: 25px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- The Compact "Card" Look --- */
+.history-card-compact {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.history-card-compact:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(46, 125, 50, 0.2);
+}
+
+.history-card-compact img {
+  width: 100%;
+  height: 250px; /* Taller, nice image area */
+  object-fit: cover;
+}
+
+.compact-info {
+  padding: 20px;
+  text-align: center;
+}
+
+.compact-info h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.status-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* --- The Detailed "Expanded" View (Modal Style) --- */
+.detail-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); /* Dimmed background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+}
+
+.detail-card-expanded {
+  background: white;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 25px;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f5f5f5;
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-btn:hover { background: #e0e0e0; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* src/App.css */
+/* --- VERTICAL CARE GUIDE LAYOUT --- */
+/* --- EXPANDED CARD LAYOUT FIXES (Top-Center Image) --- */
+
+/* 1. The Main Modal Container */
+.detail-card-expanded {
+  background: white;
+  width: 90%;
+  max-width: 700px; /* Slightly narrower for a tighter look */
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.4s ease-out;
+}
+
+/* 2. The Layout (Image Top, Text Below) */
+.expanded-content {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center;    /* Center items horizontally */
+  gap: 20px;              /* Space between image and text */
+}
+
+/* 3. The Image Container (Small & Centered) */
+.expanded-image-container {
+  width: 180px;  /* Fixed small width */
+  height: 180px; /* Fixed small height */
+  /* It centered automatically because of the parent's align-items: center */
+}
+
+.expanded-image-container img {
+  width: 100%;
+  height: 100%; /* Fill the small container */
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border: 4px solid white;
+}
+
+/* 4. The Text Content (Fills width below image) */
+.expanded-text-container {
+  width: 100%;      /* Stretch to fill the card width */
+  text-align: left; /* Reset text alignment to left for readability */
+}
+
+/* 5. The Vertical Care Guide (Row by Row - Unchanged) */
+.care-guide-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* 1 column only = Row by Row */
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.care-item {
+  background: #f8fcf8;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.care-item strong {
+  color: #2e7d32;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #c8e6c9;
+  padding-bottom: 5px;
+  width: 100%;
+}
+
+/* --- DARK MODE VARIABLES --- */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode .page-container,
+body.dark-mode .navbar,
+body.dark-mode .header-section,
+body.dark-mode .detail-card-expanded,
+body.dark-mode .history-card-compact,
+body.dark-mode .settings-card,
+body.dark-mode .modern-input, 
+body.dark-mode .auth-container {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border-color: #333;
+}
+
+body.dark-mode .navbar a {
+  color: #b0bec5;
+}
+
+body.dark-mode .navbar a.active {
+  color: #81c784;
+}
+
+body.dark-mode h1, 
+body.dark-mode h2, 
+body.dark-mode h3,
+body.dark-mode strong {
+  color: #81c784 !important;
+}
+
+body.dark-mode .modern-btn {
+  background: #2e7d32;
+  color: white;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade {
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.animate-slide {
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* --- TOGGLE SWITCH --- */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider { background-color: #2e7d32; }
+input:checked + .slider:before { transform: translateX(26px); }
+
+/* --- AUTH PAGES --- */
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.auth-container {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  animation: fadeInScale 0.5s ease;
+}
+
+.google-btn {
+  background: white;
+  color: #333;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* --- DARK MODE VARIABLES --- */
+:root {
+  --bg-color: #f4f7f6;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --accent-color: #2e7d32;
+  --accent-hover: #1b5e20;
+  --border-color: #e0e0e0;
+}
+
+body.dark-mode {
+  --bg-color: #121212;
+  --card-bg: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #aaaaaa;
+  --accent-color: #4caf50; /* Lighter green for dark mode */
+  --accent-hover: #66bb6a;
+  --border-color: #333333;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- AUTH PAGES (Login/Signup) --- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--accent-color), #81c784);
+}
+
+.auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border 0.3s;
+}
+
+.input-group input:focus {
+  border-color: var(--accent-color);
+  outline: none;
+}
+
+.modern-btn.full-width {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.google-btn {
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.google-btn:hover { background: #f5f5f5; }
+.google-btn img { width: 20px; }
+
+.divider {
+  margin: 20px 0;
+  text-align: center;
+  position: relative;
+}
+
+.divider span {
+  background: white;
+  padding: 0 10px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* --- SETTINGS PAGE --- */
+.settings-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.settings-section {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+.settings-section h3 {
+  color: var(--accent-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-top: 0;
+}
+
+/* Profile Edit */
+.profile-edit-box input {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.profile-edit-box input.editable {
+  border-color: var(--accent-color);
+  background: var(--card-bg);
+}
+
+.edit-btn, .save-btn, .history-btn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.2s;
+}
+
+.edit-btn:hover { transform: scale(1.05); }
+
+.cancel-btn {
+  background: #e53935;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+/* Toggle Switch */
+.pref-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; width: 16px;
+  left: 4px; bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider { background-color: var(--accent-color); }
+input:checked + .slider:before { transform: translateX(26px); }
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
+
+/* History Grid */
+.history-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+  animation: fadeIn 0.5s;
+}
+
+.history-card-mini {
+  background: var(--bg-color);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.history-card-mini img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.history-info { padding: 10px; }
+.history-info h4 { margin: 0; font-size: 1rem; color: var(--text-primary); }
+.history-info p { font-size: 0.8rem; color: var(--text-secondary); margin: 5px 0; }
+
+.logout-btn {
+  width: 100%;
+  padding: 15px;
+  background: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover { background: #d32f2f; }
+
+/* Animations */
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.animated-card {
+  animation: slideUp 0.6s ease-out backwards;
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* --- SCAN PAGE: SIDE-BY-SIDE LAYOUT (Desktop) --- */
+.scan-layout-container {
+  display: flex;
+  flex-direction: row; /* Side by Side */
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* The Left Side (Upload Box) */
+.scan-left-panel {
+  flex: 1;
+  max-width: 500px;
+  width: 100%;
+}
+
+/* The Right Side (Result Card) */
+.scan-right-panel {
+  flex: 1;
+  width: 100%;
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Mobile Responsive: Stack them on small screens */
+@media (max-width: 900px) {
+  .scan-layout-container {
+    flex-direction: column; /* Stack top-down */
+    align-items: center;
+  }
+  .scan-left-panel, .scan-right-panel {
+    max-width: 100%;
+  }
+}
+
+/* --- HISTORY GRID (4 Columns) --- */
+.history-grid {
+  display: grid;
+  /* Auto-fill but minimum 220px width forces ~4 cards on standard desktop */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.history-card-compact {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+  height: 100%; /* Equal Height */
+  display: flex;
+  flex-direction: column;
+}
+
+.history-card-compact:hover {
+  transform: translateY(-5px);
+}
+
+.history-card-compact img {
+  width: 100%;
+  height: 140px; /* Smaller image height */
+  object-fit: cover;
+}
+
+.compact-info {
+  padding: 12px;
+}
+
+/* --- NON-PLANT WARNING CARD --- */
+.invalid-plant-card {
+  background: #fff3e0;
+  border: 2px solid #ffb74d;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  color: #e65100;
+  max-width: 600px;
+  margin: 20px auto;
+}
