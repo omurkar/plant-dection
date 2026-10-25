@@ -1,0 +1,151 @@
+/* --- Global Reset --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f9f4; /* Very light mint background */
+  color: #333;
+}
+
+/* --- Navigation Bar --- */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #2e7d32;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #1b5e20;
+}
+
+/* --- Hero / Header Section --- */
+.header-section {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.header-section h1 {
+  font-size: 2.5rem;
+  color: #1b5e20;
+  margin-bottom: 0.5rem;
+}
+
+.header-section p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* --- The Spotlight Card Container --- */
+.category-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+/* --- The Card Styling --- */
+.plant-card {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  text-decoration: none; /* Removes underline from links */
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.plant-card img {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card-content {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.card-content h3 {
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+.card-content p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* --- THE SPOTLIGHT ANIMATION --- */
+/* 1. When hovering the container, fade ALL cards */
+.category-container:hover .plant-card {
+  opacity: 0.5;
+  filter: blur(2px) grayscale(50%);
+  transform: scale(0.95);
+}
+
+/* 2. But keep the HOVERED card bright and popped out */
+.category-container .plant-card:hover {
+  opacity: 1;
+  filter: blur(0) grayscale(0%);
+  transform: scale(1.05) translateY(-10px);
+  z-index: 10;
+  box-shadow: 0 20px 40px rgba(46, 125, 50, 0.3);
+  border: 2px solid #4CAF50;
+}
+
+.plant-card:hover img {
+  transform: scale(1.1); /* Zoom image */
+}
+
+/* --- Fun Facts Section --- */
+.fun-facts-section {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: #e8f5e9;
+  margin-top: 3rem;
+  border-radius: 20px 20px 0 0;
+}
+
+.fun-fact-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  display: inline-block;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  transition: transform 0.3s;
+}
+
+.fun-fact-card:hover {
+  transform: translateY(-5px);
+}
