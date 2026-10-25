@@ -98,6 +98,27 @@ export default function Login() {
           Sign in with Google
         </button>
 
+        <button
+          onClick={() => {
+            localStorage.setItem('plantscan_guest_user', 'true');
+            navigate('/community');
+          }}
+          style={{
+            width: '100%',
+            marginTop: '10px',
+            padding: '12px',
+            border: '2px dashed #81c784',
+            background: '#f1f8e9',
+            color: '#2e7d32',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: '0.95rem'
+          }}
+        >
+          🌿 Continue as Guest / Explore
+        </button>
+
         <div className="auth-footer" style={{marginTop: '25px', textAlign: 'center', fontSize: '0.9rem'}}>
           <Link to="/forgot-password" style={{color: '#2e7d32', textDecoration: 'none', display: 'block', marginBottom: '10px'}}>Forgot Password?</Link>
           <p>New here? <Link to="/signup" style={{color: '#2e7d32', fontWeight: 'bold'}}>Create Account</Link></p>

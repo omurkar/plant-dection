@@ -10,11 +10,13 @@ import Scan from './pages/Scan';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Community from './pages/Community';
 
 // Protected Route Component
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { currentUser } = useAuth();
-  return currentUser ? children : <Navigate to="/login" />;
+  const isGuest = localStorage.getItem('plantscan_guest_user') === 'true';
+  return (currentUser || isGuest) ? children : <Navigate to="/login" />;
 };
 
 function App() {
@@ -34,6 +36,7 @@ function App() {
             <Route path="/indoor" element={<PrivateRoute><Indoor /></PrivateRoute>} />
             <Route path="/outdoor" element={<PrivateRoute><Outdoor /></PrivateRoute>} />
             <Route path="/scan" element={<PrivateRoute><Scan /></PrivateRoute>} />
+            <Route path="/community" element={<PrivateRoute><Community /></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           </Routes>
         </Router>

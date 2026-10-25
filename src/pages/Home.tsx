@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFunPlantFact } from '../api/gemini'; // Import the API function
+import { getFunPlantFact } from '../api/gemini';
+import { getEcoScore } from '../services/ecoScoreService';
+import { fetchLiveWeather, getCachedWeather, type LiveWeatherInfo } from '../services/weatherService';
 import '../App.css';
 
 const Home = () => {
   const navigate = useNavigate();
-
-  // 1. Create state for the fact
   const [funFact, setFunFact] = useState("Loading amazing plant fact...");
+  const [weather, setWeather] = useState<LiveWeatherInfo>(getCachedWeather());
+  const ecoRecord = getEcoScore();
+
+  useEffect(() => {
+    fetchLiveWeather().then(setWeather).catch(() => {});
+  }, []);
 
   // 2. Add this useEffect to run the timer
   useEffect(() => {
@@ -44,6 +50,7 @@ const Home = () => {
           <a href="/indoor">Indoor</a>
           <a href="/outdoor">Outdoor</a>
           <a href="/scan">Scan</a>
+          <a href="/community">Community</a>
           <a href="/settings">Settings</a>
         </div>
       </nav>
@@ -93,6 +100,54 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Add a 4th card for Community */}
+        <div className="plant-card" onClick={() => navigate('/community')}>
+          <img
+            src="https://images.unsplash.com/photo-1504714146340-959ca07e1f38?auto=format&fit=crop&w=600&q=80"
+            alt="Community"
+          />
+          <div className="card-content">
+            <h3>🌍 Eco Community</h3>
+            <p>Join plant swaps, map biodiversity, and track your eco-score.</p>
+          </div>
+        </div>
+
+      </section>
+
+      {/* --- ECO SCORE + WEATHER BANNER --- */}
+      <section style={{ maxWidth: '800px', margin: '0 auto 20px', padding: '0 20px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: '220px',
+            background: weather.isRain
+              ? 'linear-gradient(135deg,#1565c0,#1976d2)'
+              : weather.isExtremelyHot
+              ? 'linear-gradient(135deg,#d84315,#f57c00)'
+              : 'linear-gradient(135deg,#2e7d32,#43a047)',
+            color: '#fff',
+            borderRadius: '14px',
+            padding: '14px 20px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.12)'
+          }}
+          onClick={() => navigate('/community')}
+        >
+          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{weather.icon}</div>
+          <div style={{ fontWeight: 700, fontSize: '1rem' }}>
+            {weather.isRain ? 'Skip Watering Today' : weather.isExtremelyHot ? 'Intense Heat • Water Early' : 'Good Day to Water'}
+          </div>
+          <div style={{ fontSize: '0.8rem', opacity: 0.9, marginTop: '3px' }}>
+            {weather.condition} • {weather.locationName}
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: '220px', background: 'linear-gradient(135deg,#f57f17,#ffa000)', color: '#fff', borderRadius: '14px', padding: '14px 20px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(245,127,23,0.25)' }} onClick={() => navigate('/community')}>
+          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🏆</div>
+          <div style={{ fontWeight: 700, fontSize: '1.4rem' }}>{ecoRecord.score} pts</div>
+          <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>
+            {ecoRecord.badges.length > 0 ? ecoRecord.badges[ecoRecord.badges.length - 1] : 'Start earning eco points!'}
+          </div>
+        </div>
       </section>
 
       {/* --- FUN FACT SECTION (Updated to Automatic) --- */}

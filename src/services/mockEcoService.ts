@@ -4,24 +4,42 @@ export type PlantData = {
   isNative: boolean;
   isInvasive: boolean;
   carbonOffsetKgPerYear: number;
+  estimatedCarbonKg?: number;
+  companionPlants?: string[];
   pollinatorFriendly: string[];
   compostCategory: 'Green' | 'Brown';
 };
 
 export const MOCK_PLANT_DATABASE: Record<string, PlantData> = {
-  tulsi: { id: '1', name: 'Holy Basil (Tulsi)', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 1.2, pollinatorFriendly: ['Bees'], compostCategory: 'Green' },
-  lantana: { id: '2', name: 'Lantana Camara', isNative: false, isInvasive: true, carbonOffsetKgPerYear: 0.8, pollinatorFriendly: ['Butterflies'], compostCategory: 'Brown' },
-  neem: { id: '3', name: 'Neem Tree', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 15.0, pollinatorFriendly: ['Birds', 'Bees'], compostCategory: 'Brown' },
-  aloe: { id: '4', name: 'Aloe Vera', isNative: false, isInvasive: false, carbonOffsetKgPerYear: 0.6, pollinatorFriendly: ['Hummingbirds'], compostCategory: 'Green' },
-  basil: { id: '5', name: 'Basil', isNative: false, isInvasive: false, carbonOffsetKgPerYear: 0.7, pollinatorFriendly: ['Bees'], compostCategory: 'Green' },
-  'snake plant': { id: '6', name: 'Snake Plant', isNative: false, isInvasive: false, carbonOffsetKgPerYear: 0.9, pollinatorFriendly: ['Bees'], compostCategory: 'Brown' },
-  mango: { id: '7', name: 'Mango', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 8.5, pollinatorFriendly: ['Bees', 'Birds'], compostCategory: 'Brown' },
-  banyan: { id: '8', name: 'Banyan Tree', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 12.0, pollinatorFriendly: ['Birds'], compostCategory: 'Brown' },
+  tulsi: { id: '1', name: 'Holy Basil (Tulsi)', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 1.2, estimatedCarbonKg: 1.2, companionPlants: ['Marigold', 'Tomato', 'Bell Pepper'], pollinatorFriendly: ['Bees'], compostCategory: 'Green' },
+  lantana: { id: '2', name: 'Lantana Camara', isNative: false, isInvasive: true, carbonOffsetKgPerYear: 0.8, estimatedCarbonKg: 0.8, companionPlants: ['Butterfly Bush', 'Salvia'], pollinatorFriendly: ['Butterflies'], compostCategory: 'Brown' },
+  neem: { id: '3', name: 'Neem Tree', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 15.0, estimatedCarbonKg: 15.0, companionPlants: ['Aloe Vera', 'Lemongrass', 'Turmeric'], pollinatorFriendly: ['Birds', 'Bees'], compostCategory: 'Brown' },
+  aloe: { id: '4', name: 'Aloe Vera', isNative: false, isInvasive: false, carbonOffsetKgPerYear: 0.6, estimatedCarbonKg: 0.6, companionPlants: ['Snake Plant', 'Jade Plant'], pollinatorFriendly: ['Hummingbirds'], compostCategory: 'Green' },
+  basil: { id: '5', name: 'Basil', isNative: false, isInvasive: false, carbonOffsetKgPerYear: 0.7, estimatedCarbonKg: 0.7, companionPlants: ['Tomato', 'Marigold', 'Oregano'], pollinatorFriendly: ['Bees'], compostCategory: 'Green' },
+  'snake plant': { id: '6', name: 'Snake Plant', isNative: false, isInvasive: false, carbonOffsetKgPerYear: 0.9, estimatedCarbonKg: 0.9, companionPlants: ['ZZ Plant', 'Pothos', 'Aloe Vera'], pollinatorFriendly: ['Bees'], compostCategory: 'Brown' },
+  mango: { id: '7', name: 'Mango', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 8.5, estimatedCarbonKg: 8.5, companionPlants: ['Neem', 'Curry Leaf'], pollinatorFriendly: ['Bees', 'Birds'], compostCategory: 'Brown' },
+  banyan: { id: '8', name: 'Banyan Tree', isNative: true, isInvasive: false, carbonOffsetKgPerYear: 12.0, estimatedCarbonKg: 12.0, companionPlants: ['Neem', 'Tulsi'], pollinatorFriendly: ['Birds'], compostCategory: 'Brown' },
 };
 
-export const shouldWaterOutdoorPlants = (currentCondition: string = 'Heavy Monsoon Rain'): boolean => {
-  const rainyConditions = ['Rain', 'Heavy Monsoon Rain', 'Drizzle', 'Thunderstorm', 'Monsoon', 'Cloudy with rain'];
-  return !rainyConditions.includes(currentCondition);
+export const getCompanionPlantsFor = (plantName: string): string[] => {
+  const lower = plantName.toLowerCase();
+  for (const [key, plant] of Object.entries(MOCK_PLANT_DATABASE)) {
+    if (lower.includes(key) && plant.companionPlants) {
+      return plant.companionPlants;
+    }
+  }
+  return ['Marigold', 'Basil', 'Mint', 'Aloe Vera'];
+};
+
+export const calculateTotalCO2Offset = (plants: Array<{ estimatedCarbonKg?: number; carbonOffsetKgPerYear?: number }>): number => {
+  return Number(plants.reduce((sum, p) => sum + (p.estimatedCarbonKg ?? p.carbonOffsetKgPerYear ?? 0), 0).toFixed(2));
+};
+
+export const shouldWaterOutdoorPlants = (currentCondition?: string): boolean => {
+  if (!currentCondition) return true;
+  const rainyConditions = ['rain', 'monsoon', 'drizzle', 'thunderstorm', 'cloudy with rain', 'shower'];
+  const lower = currentCondition.toLowerCase();
+  return !rainyConditions.some((r) => lower.includes(r));
 };
 
 export const diagnosePlantLocally = (imageFeatures: string) => {

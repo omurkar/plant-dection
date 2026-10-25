@@ -42,6 +42,7 @@ const Settings = () => {
           <a href="/indoor">Indoor</a>
           <a href="/outdoor">Outdoor</a>
           <a href="/scan">Scan</a>
+          <a href="/community">Community</a>
           <a href="/settings" className="active">Settings</a>
         </div>
       </nav>

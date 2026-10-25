@@ -17,6 +17,7 @@ const NavBar: React.FC = () => {
           <Link to="/indoor" className="hover:underline">Indoor</Link>
           <Link to="/outdoor" className="hover:underline">Outdoor</Link>
           <Link to="/scan" className="hover:underline">Scan</Link>
+          <Link to="/community" className="hover:underline">Community</Link>
           <Link to="/settings" className="hover:underline">Settings</Link>
         </div>
       </div>

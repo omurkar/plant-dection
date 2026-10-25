@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { getPlantRecommendation } from '../api/gemini';
 import { db, auth } from '../firebase';
 import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { calculateCompostRatio, getUserEcoProfile, calculateTotalCO2Offset, getCompanionPlantsFor, MOCK_PLANT_DATABASE } from '../services/mockEcoService';
+import { getEcoScore, awardCompostCheck, awardRainSkip } from '../services/ecoScoreService';
+import { fetchLiveWeather, getCachedWeather, type LiveWeatherInfo } from '../services/weatherService';
 import '../App.css';
 
 const Indoor = () => {
@@ -10,6 +13,38 @@ const Indoor = () => {
   const [pinCode, setPinCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
+  const [ecoScore, setEcoScore] = useState(getEcoScore());
+  const [toast, setToast] = useState<string | null>(null);
+  const [weather, setWeather] = useState<LiveWeatherInfo>(getCachedWeather());
+
+  useEffect(() => {
+    fetchLiveWeather().then(setWeather).catch(() => {});
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Compute global eco stats & personalized compost ratios from all plants in user's saved collection
+  const allPlants = history.map((h) => {
+    const known = MOCK_PLANT_DATABASE[(h.plantName || '').toLowerCase()];
+    return {
+      id: h.id || String(h.timestamp || Date.now()),
+      name: h.plantName || 'Indoor Plant',
+      isNative: h.plantMeta?.isNative ?? known?.isNative ?? true,
+      isInvasive: h.plantMeta?.isInvasive ?? known?.isInvasive ?? false,
+      carbonOffsetKgPerYear: h.estimatedCarbonKg ?? known?.carbonOffsetKgPerYear ?? 1.2,
+      estimatedCarbonKg: h.estimatedCarbonKg ?? known?.estimatedCarbonKg ?? 1.2,
+      companionPlants: h.companionPlants ?? known?.companionPlants ?? getCompanionPlantsFor(h.plantName || ''),
+      pollinatorFriendly: known?.pollinatorFriendly ?? ['Bees'],
+      compostCategory: (known?.compostCategory || (h.plantMeta?.isInvasive ? 'Brown' : 'Green')) as 'Green' | 'Brown'
+    };
+  });
+
+  const totalCollectionCO2 = calculateTotalCO2Offset(allPlants);
+  const globalCompost = allPlants.length > 0 ? calculateCompostRatio(allPlants) : null;
+  const globalEcoProfile = allPlants.length > 0 ? getUserEcoProfile(allPlants) : null;
   const [expandedId, setExpandedId] = useState<string | number | null>(null);
 
   useEffect(() => {
@@ -52,11 +87,17 @@ const Indoor = () => {
         setLoading(false);
         return;
       }
+      const matched = MOCK_PLANT_DATABASE[searchTerm.toLowerCase()];
+      const estimatedCarbonKg = data.estimatedCarbonKg ?? matched?.estimatedCarbonKg ?? matched?.carbonOffsetKgPerYear ?? 1.2;
+      const companionPlants = data.companionPlants ?? matched?.companionPlants ?? getCompanionPlantsFor(searchTerm);
+
       const newResult = {
         plantName: searchTerm,
         pin: pinCode,
         imageUrl: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(searchTerm + ' plant indoor aesthetic')}&w=500&h=500&c=7&rs=1&p=0`,
         ...data,
+        estimatedCarbonKg,
+        companionPlants,
         timestamp: Date.now(),
         userId: auth.currentUser ? auth.currentUser.uid : "anonymous"
       };
@@ -77,6 +118,18 @@ const Indoor = () => {
     setLoading(false);
   };
 
+  const handleSkipWatering = () => {
+    const updated = awardRainSkip();
+    setEcoScore(updated);
+    showToast('🌧️ Watering skipped! +10 Eco Points earned.');
+  };
+
+  const handleCompostCheck = () => {
+    const updated = awardCompostCheck();
+    setEcoScore(updated);
+    showToast('♻️ Compost checked! +5 Eco Points earned.');
+  };
+
   // Render star rating
   const renderStars = (rating: number) => {
     return '★'.repeat(Math.min(rating, 5)) + '☆'.repeat(Math.max(5 - rating, 0));
@@ -90,6 +143,13 @@ const Indoor = () => {
       backgroundAttachment: 'fixed',
       minHeight: '100vh'
     }}>
+      {/* Toast notification */}
+      {toast && (
+        <div style={{ position: 'fixed', top: '20px', right: '20px', background: 'linear-gradient(135deg,#2e7d32,#43a047)', color: '#fff', padding: '14px 22px', borderRadius: '12px', zIndex: 9999, fontWeight: 600, boxShadow: '0 4px 20px rgba(46,125,50,0.4)' }}>
+          {toast}
+        </div>
+      )}
+
       <nav className="navbar">
         <div className="logo"><h2>🌿 PlantScan</h2></div>
         <div className="nav-links">
@@ -97,6 +157,7 @@ const Indoor = () => {
           <a href="/indoor" className="active">Indoor</a>
           <a href="/outdoor">Outdoor</a>
           <a href="/scan">Scan</a>
+          <a href="/community">Community</a>
           <a href="/settings">Settings</a>
         </div>
       </nav>
@@ -112,6 +173,72 @@ const Indoor = () => {
           </button>
         </div>
       </div>
+
+      {/* Weather + Eco-Score Banner */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto 16px', padding: '0 20px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            flex: 2,
+            minWidth: '260px',
+            background: weather.isRain
+              ? 'linear-gradient(135deg,#1565c0,#1976d2)'
+              : weather.isExtremelyHot
+              ? 'linear-gradient(135deg,#d84315,#f57c00)'
+              : 'linear-gradient(135deg,#2e7d32,#43a047)',
+            color: '#fff',
+            borderRadius: '14px',
+            padding: '14px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+          }}
+        >
+          <span style={{ fontSize: '1.8rem' }}>{weather.icon}</span>
+          <div style={{ flex: 1 }}>
+            <strong>{weather.condition} • {weather.locationName}</strong>
+            <p style={{ margin: '3px 0 0', fontSize: '0.82rem', opacity: 0.9 }}>
+              {weather.recommendation}
+            </p>
+          </div>
+          {weather.isRain && (
+            <button onClick={handleSkipWatering} style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.5)', color: '#fff', borderRadius: '10px', padding: '6px 14px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+              Skip (+10 pts)
+            </button>
+          )}
+        </div>
+        <div style={{ minWidth: '200px', background: 'linear-gradient(135deg,#f57f17,#ffa000)', color: '#fff', borderRadius: '14px', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 15px rgba(245,127,23,0.3)' }}>
+          <span style={{ fontSize: '1.8rem' }}>🏆</span>
+          <div>
+            <strong style={{ fontSize: '1.4rem' }}>{ecoScore.score}</strong>
+            <p style={{ margin: '2px 0 0', fontSize: '0.8rem', opacity: 0.9 }}>Eco Points</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Global Eco Stats */}
+      {allPlants.length > 0 && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto 20px', padding: '0 20px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '240px', background: '#e8f5e9', borderRadius: '14px', padding: '16px 20px', borderLeft: '5px solid #2e7d32' }}>
+            <h4 style={{ margin: '0 0 8px', color: '#1b5e20' }}>🌍 Collection CO₂ Offset</h4>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#2e7d32' }}>{totalCollectionCO2} kg</div>
+            <div style={{ fontSize: '0.82rem', color: '#555' }}>Total CO₂ offset per year from your {allPlants.length} saved plant{allPlants.length > 1 ? 's' : ''}</div>
+            {globalEcoProfile && globalEcoProfile.badges.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                {globalEcoProfile.badges.map((b, i) => <span key={i} style={{ background: '#2e7d32', color: '#fff', borderRadius: '20px', padding: '3px 10px', fontSize: '0.75rem' }}>{b}</span>)}
+              </div>
+            )}
+          </div>
+          {globalCompost && (
+            <div style={{ flex: 1, minWidth: '240px', background: '#f1f8e9', borderRadius: '14px', padding: '16px 20px', borderLeft: '5px solid #8bc34a', cursor: 'pointer' }} onClick={handleCompostCheck}>
+              <h4 style={{ margin: '0 0 8px', color: '#558b2f' }}>♻️ Personalized Compost Ratio</h4>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#558b2f' }}>{globalCompost.currentRatio}</div>
+              <div style={{ fontSize: '0.82rem', color: '#555', marginTop: '4px' }}>{globalCompost.advice}</div>
+              <div style={{ fontSize: '0.75rem', color: '#8bc34a', marginTop: '6px', fontWeight: 600 }}>Tap to earn +5 Eco Points ♻️</div>
+            </div>
+          )}
+        </div>
+      )}
 
       <h2 style={{ textAlign: 'center', marginTop: '40px', color: '#2e7d32' }}>Your Search History</h2>
 
@@ -286,6 +413,50 @@ const Indoor = () => {
                       <div className="detail-section-card" style={{ background: '#fff8e1', borderLeft: '4px solid #ffa000' }}>
                         <h3 className="detail-section-title" style={{ color: '#e65100' }}>⚠️ Common Problems</h3>
                         <p style={{ lineHeight: '1.7', color: '#444' }}>{cg.commonProblems}</p>
+                      </div>
+                    )}
+
+                    {/* ═══ ECO METADATA ═══ */}
+                    {item.plantMeta && (
+                      <div className="detail-section-card" style={{ background: 'linear-gradient(135deg,#e8f5e9,#f1f8e9)', borderLeft: '4px solid #43a047' }}>
+                        <h3 className="detail-section-title" style={{ color: '#2e7d32' }}>🌍 Eco Intelligence</h3>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                          {item.plantMeta.isNative && <span style={{ background: '#2e7d32', color: '#fff', borderRadius: '20px', padding: '4px 12px', fontSize: '0.8rem', fontWeight: 600 }}>🌿 Native Species</span>}
+                          {item.plantMeta.isInvasive && <span style={{ background: '#c62828', color: '#fff', borderRadius: '20px', padding: '4px 12px', fontSize: '0.8rem', fontWeight: 600 }}>⚠️ Invasive Species</span>}
+                        </div>
+                        <p style={{ margin: '0 0 10px', fontWeight: 600, color: '#2e7d32', fontSize: '0.95rem' }}>
+                          ☁️ Estimated Carbon Offset: <strong>{(item.estimatedCarbonKg ?? item.carbonOffsetKgPerYear ?? item.ecoProfile?.totalCarbonOffset ?? 1.2).toFixed(1)} kg CO₂/year</strong>
+                        </p>
+                        <div style={{ marginBottom: '8px' }}>
+                          <strong style={{ fontSize: '0.88rem', color: '#1b5e20' }}>🌸 Companion Plants: </strong>
+                          {(item.companionPlants || getCompanionPlantsFor(item.plantName || '')).map((c: string, i: number) => (
+                            <span key={i} style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: '12px', padding: '2px 8px', fontSize: '0.78rem', color: '#2e7d32', marginLeft: '5px' }}>{c}</span>
+                          ))}
+                        </div>
+                        {item.plantMeta.commonPests?.length > 0 && (
+                          <div style={{ marginBottom: '8px' }}>
+                            <strong style={{ fontSize: '0.88rem', color: '#e65100' }}>🐛 Pests: </strong>
+                            {item.plantMeta.commonPests.map((p: string, i: number) => (
+                              <span key={i} style={{ background: '#fff3e0', border: '1px solid #ffa000', borderRadius: '12px', padding: '2px 8px', fontSize: '0.78rem', color: '#e65100', marginLeft: '5px' }}>{p}</span>
+                            ))}
+                          </div>
+                        )}
+                        {item.plantMeta.organicRemedies?.length > 0 && (
+                          <ul style={{ margin: '4px 0 0', paddingLeft: '18px' }}>
+                            {item.plantMeta.organicRemedies.map((r: string, i: number) => (
+                              <li key={i} style={{ fontSize: '0.84rem', color: '#444', marginBottom: '2px' }}>🍃 {r}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ═══ COMPOST RATIO ═══ */}
+                    {item.compostRatio && (
+                      <div className="detail-section-card" style={{ background: '#f1f8e9', borderLeft: '4px solid #8bc34a' }}>
+                        <h3 className="detail-section-title" style={{ color: '#558b2f' }}>♻️ Compost Guide</h3>
+                        <p style={{ margin: '0 0 4px', fontWeight: 600, color: '#558b2f' }}>{item.compostRatio.currentRatio}</p>
+                        <p style={{ margin: 0, fontSize: '0.88rem', color: '#555' }}>{item.compostRatio.advice}</p>
                       </div>
                     )}
 

@@ -3,13 +3,21 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { identifyPlantDisease } from '../api/gemini';
 import { db, auth } from '../firebase';
 import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { awardNativeScan, getEcoScore } from '../services/ecoScoreService';
+import { fetchLiveWeather, getCachedWeather, type LiveWeatherInfo } from '../services/weatherService';
 import '../App.css';
 
 const Scan = () => {
   const [loading, setLoading] = useState(false);
   const [scanResult, setScanResult] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'cause' | 'cure' | 'references'>('cause');
+  const [activeTab, setActiveTab] = useState<'cause' | 'cure' | 'references' | 'eco'>('cause');
+  const [ecoScore, setEcoScore] = useState(getEcoScore());
+  const [weather, setWeather] = useState<LiveWeatherInfo>(getCachedWeather());
+
+  useEffect(() => {
+    fetchLiveWeather().then(setWeather).catch(() => {});
+  }, []);
 
   // Camera states
   const [cameraActive, setCameraActive] = useState(false);
@@ -147,8 +155,14 @@ const Scan = () => {
     if (data) {
       setScanResult(data);
 
+      // Award eco points if native plant was scanned
+      if (data.isNative || data.plantMeta?.isNative) {
+        const updated = awardNativeScan();
+        setEcoScore(updated);
+      }
+
       const newScan = {
-        image: capturedImage.length < 900000 ? capturedImage : null, // Only save if not too large
+        image: capturedImage.length < 900000 ? capturedImage : null,
         ...data,
         timestamp: Date.now(),
         userId: auth.currentUser ? auth.currentUser.uid : "anonymous"
@@ -194,6 +208,7 @@ const Scan = () => {
           <a href="/indoor">Indoor</a>
           <a href="/outdoor">Outdoor</a>
           <a href="/scan" className="active">Scan</a>
+          <a href="/community">Community</a>
           <a href="/settings">Settings</a>
         </div>
       </nav>
@@ -201,6 +216,43 @@ const Scan = () => {
       <div className="header-section">
         <h1>🔬 Real-Time Plant Scanner</h1>
         <p>Point your camera at a plant leaf to detect diseases instantly.</p>
+      </div>
+
+      {/* Weather + Eco-Score Banner */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto 16px', padding: '0 20px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: '260px',
+            background: weather.isRain
+              ? 'linear-gradient(135deg,#1565c0,#1976d2)'
+              : weather.isExtremelyHot
+              ? 'linear-gradient(135deg,#d84315,#f57c00)'
+              : 'linear-gradient(135deg,#2e7d32,#43a047)',
+            color: '#fff',
+            borderRadius: '14px',
+            padding: '14px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+          }}
+        >
+          <span style={{ fontSize: '1.8rem' }}>{weather.icon}</span>
+          <div>
+            <strong>{weather.condition} • {weather.locationName}</strong>
+            <p style={{ margin: '3px 0 0', fontSize: '0.82rem', opacity: 0.9 }}>
+              {weather.recommendation}
+            </p>
+          </div>
+        </div>
+        <div style={{ minWidth: '200px', background: 'linear-gradient(135deg,#f57f17,#ffa000)', color: '#fff', borderRadius: '14px', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 15px rgba(245,127,23,0.3)' }}>
+          <span style={{ fontSize: '1.8rem' }}>🏆</span>
+          <div>
+            <strong style={{ fontSize: '1.4rem' }}>{ecoScore.score}</strong>
+            <p style={{ margin: '2px 0 0', fontSize: '0.8rem', opacity: 0.9 }}>Eco Points • Scan native plants to earn more!</p>
+          </div>
+        </div>
       </div>
 
       {/* Side-by-side container */}
@@ -344,6 +396,13 @@ const Scan = () => {
                 >
                   📚 References
                 </button>
+                <button
+                  className={`tab-btn ${activeTab === 'eco' ? 'tab-active' : ''}`}
+                  onClick={() => setActiveTab('eco')}
+                  style={{ background: activeTab === 'eco' ? 'linear-gradient(135deg,#2e7d32,#43a047)' : undefined, color: activeTab === 'eco' ? '#fff' : undefined }}
+                >
+                  🌿 Eco Info
+                </button>
               </div>
 
               {/* Tab Content */}
@@ -470,6 +529,101 @@ const Scan = () => {
                     </div>
                   </div>
                 )}
+
+                {/* TAB 4: Eco Info */}
+                {activeTab === 'eco' && (
+                  <div className="tab-panel animate-fade">
+                    {/* Native / Invasive Alert */}
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                      {(scanResult.isNative || scanResult.plantMeta?.isNative) && (
+                        <div style={{ background: '#e8f5e9', border: '2px solid #43a047', borderRadius: '10px', padding: '10px 16px', flex: 1, minWidth: '140px' }}>
+                          <div style={{ fontWeight: 700, color: '#2e7d32', fontSize: '1rem' }}>🌿 Native Species</div>
+                          <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#555' }}>This plant is native to India. Scanning it earned you +15 Eco Points!</p>
+                        </div>
+                      )}
+                      {(scanResult.isInvasive || scanResult.plantMeta?.isInvasive) && (
+                        <div style={{ background: '#ffebee', border: '2px solid #ef5350', borderRadius: '10px', padding: '10px 16px', flex: 1, minWidth: '140px' }}>
+                          <div style={{ fontWeight: 700, color: '#c62828', fontSize: '1rem' }}>⚠️ Invasive Species</div>
+                          <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#555' }}>This plant can outcompete native flora. Consider removing or containing it.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Common Pests */}
+                    {(scanResult.commonPests || scanResult.plantMeta?.commonPests) && (
+                      <div className="treatment-section">
+                        <div className="treatment-header" style={{ background: '#fff3e0' }}>
+                          <span className="treatment-icon">🐛</span>
+                          <h4>Common Pests to Watch</h4>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '10px 0' }}>
+                          {(scanResult.commonPests || scanResult.plantMeta?.commonPests || []).map((pest: string, i: number) => (
+                            <span key={i} style={{ background: '#fff3e0', border: '1px solid #ffa000', borderRadius: '20px', padding: '4px 12px', fontSize: '0.85rem', color: '#e65100' }}>🪲 {pest}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Organic Remedies */}
+                    {(scanResult.organicRemedies || scanResult.plantMeta?.organicRemedies) && (
+                      <div className="treatment-section">
+                        <div className="treatment-header homeopathic-header">
+                          <span className="treatment-icon">🌱</span>
+                          <h4>Organic Remedies</h4>
+                        </div>
+                        <ul className="treatment-list">
+                          {(scanResult.organicRemedies || scanResult.plantMeta?.organicRemedies || []).map((r: string, i: number) => (
+                            <li key={i} className="treatment-item organic-item"><span className="treatment-bullet">🍃</span>{r}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Eco Profile */}
+                    {scanResult.ecoProfile && (
+                      <div className="treatment-section" style={{ background: '#e8f5e9', borderRadius: '10px', padding: '12px 16px', borderLeft: '4px solid #2e7d32' }}>
+                        <h4 style={{ margin: '0 0 8px', color: '#1b5e20' }}>🏆 Eco Profile</h4>
+                        <p style={{ margin: '0 0 8px', fontSize: '0.9rem' }}><strong>Total CO₂ Offset:</strong> {scanResult.ecoProfile.totalCarbonOffset?.toFixed(2)} kg/year</p>
+                        {scanResult.ecoProfile.badges?.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {scanResult.ecoProfile.badges.map((b: string, i: number) => (
+                              <span key={i} style={{ background: '#2e7d32', color: '#fff', borderRadius: '20px', padding: '3px 10px', fontSize: '0.8rem' }}>{b}</span>
+                            ))}
+                          </div>
+                        )}
+                        {scanResult.ecoProfile.tasks && (
+                          <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#555' }}>
+                            <div>⚡ <strong>Urgent:</strong> {scanResult.ecoProfile.tasks.urgent}</div>
+                            <div>🌱 <strong>Seasonal:</strong> {scanResult.ecoProfile.tasks.seasonal}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Compost Ratio */}
+                    {scanResult.compostRatio && (
+                      <div style={{ marginTop: '12px', background: '#f1f8e9', borderRadius: '10px', padding: '12px 16px', borderLeft: '4px solid #8bc34a' }}>
+                        <h4 style={{ margin: '0 0 6px', color: '#558b2f' }}>♻️ Compost Guide</h4>
+                        <p style={{ margin: '0 0 4px', fontSize: '0.88rem' }}><strong>Ratio:</strong> {scanResult.compostRatio.currentRatio}</p>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}>{scanResult.compostRatio.advice}</p>
+                      </div>
+                    )}
+
+                    {/* Live Climate Watering Guidance */}
+                    {weather.isRain ? (
+                      <div style={{ marginTop: '12px', background: '#e3f2fd', borderRadius: '10px', padding: '12px 16px', borderLeft: '4px solid #1976d2' }}>
+                        <h4 style={{ margin: '0 0 6px', color: '#1565c0' }}>🌧️ Rain Detected ({weather.locationName})</h4>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}>Rain is active! Outdoor watering is paused to save water. Skip watering to earn +10 Eco Points!</p>
+                      </div>
+                    ) : weather.isExtremelyHot ? (
+                      <div style={{ marginTop: '12px', background: '#fff3e0', borderRadius: '10px', padding: '12px 16px', borderLeft: '4px solid #f57c00' }}>
+                        <h4 style={{ margin: '0 0 6px', color: '#e65100' }}>☀️ Heatwave Alert ({weather.temperature}°C)</h4>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555' }}>High heat detected in {weather.locationName}. Water thoroughly early morning or evening to protect roots from dehydration.</p>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
               </div>
             </div>
           </div>
